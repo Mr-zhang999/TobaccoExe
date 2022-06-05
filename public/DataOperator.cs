@@ -12,7 +12,6 @@ namespace TobaccoApp
     {
         private static string connString = "Data Source=localhost;Initial Catalog=Tobacco;Integrated Security=True";//数据库连接字符串
         public static SqlConnection connection = new SqlConnection(connString);//数据库连接对象
-
         public static void ExecSQL(string sql)
         {
             SqlCommand command = new SqlCommand(sql, connection);
@@ -20,7 +19,6 @@ namespace TobaccoApp
                 connection.Open();
             command.ExecuteScalar();
             connection.Close();
-
         }
         public static int ExecSQLResult(string sql)
         {
