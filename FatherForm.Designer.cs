@@ -41,12 +41,12 @@ namespace TobaccoExe
             // 
             this.panel_form.Location = new System.Drawing.Point(40, 92);
             this.panel_form.Name = "panel_form";
-            this.panel_form.Size = new System.Drawing.Size(905, 429);
+            this.panel_form.Size = new System.Drawing.Size(1291, 654);
             this.panel_form.TabIndex = 0;
             // 
             // btn_mainForm
             // 
-            this.btn_mainForm.Location = new System.Drawing.Point(50, 35);
+            this.btn_mainForm.Location = new System.Drawing.Point(75, 35);
             this.btn_mainForm.Name = "btn_mainForm";
             this.btn_mainForm.Size = new System.Drawing.Size(102, 37);
             this.btn_mainForm.TabIndex = 1;
@@ -56,7 +56,7 @@ namespace TobaccoExe
             // 
             // btn_paraSet
             // 
-            this.btn_paraSet.Location = new System.Drawing.Point(177, 35);
+            this.btn_paraSet.Location = new System.Drawing.Point(223, 35);
             this.btn_paraSet.Name = "btn_paraSet";
             this.btn_paraSet.Size = new System.Drawing.Size(98, 37);
             this.btn_paraSet.TabIndex = 2;
@@ -65,9 +65,9 @@ namespace TobaccoExe
             // 
             // btn_modeSet
             // 
-            this.btn_modeSet.Location = new System.Drawing.Point(306, 35);
+            this.btn_modeSet.Location = new System.Drawing.Point(383, 35);
             this.btn_modeSet.Name = "btn_modeSet";
-            this.btn_modeSet.Size = new System.Drawing.Size(99, 37);
+            this.btn_modeSet.Size = new System.Drawing.Size(116, 37);
             this.btn_modeSet.TabIndex = 3;
             this.btn_modeSet.Text = "参数设置";
             this.btn_modeSet.UseVisualStyleBackColor = true;
@@ -75,7 +75,7 @@ namespace TobaccoExe
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(691, 46);
+            this.label1.Location = new System.Drawing.Point(1077, 46);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(67, 15);
             this.label1.TabIndex = 4;
@@ -84,7 +84,7 @@ namespace TobaccoExe
             // connect_status
             // 
             this.connect_status.AutoSize = true;
-            this.connect_status.Location = new System.Drawing.Point(789, 46);
+            this.connect_status.Location = new System.Drawing.Point(1200, 46);
             this.connect_status.Name = "connect_status";
             this.connect_status.Size = new System.Drawing.Size(52, 15);
             this.connect_status.TabIndex = 5;
@@ -94,7 +94,7 @@ namespace TobaccoExe
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(978, 592);
+            this.ClientSize = new System.Drawing.Size(1370, 776);
             this.Controls.Add(this.connect_status);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btn_modeSet);
