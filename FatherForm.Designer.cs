@@ -69,7 +69,7 @@ namespace TobaccoExe
             this.btn_modeSet.Name = "btn_modeSet";
             this.btn_modeSet.Size = new System.Drawing.Size(116, 37);
             this.btn_modeSet.TabIndex = 3;
-            this.btn_modeSet.Text = "参数设置";
+            this.btn_modeSet.Text = "模式设置";
             this.btn_modeSet.UseVisualStyleBackColor = true;
             // 
             // label1
@@ -102,7 +102,7 @@ namespace TobaccoExe
             this.Controls.Add(this.btn_mainForm);
             this.Controls.Add(this.panel_form);
             this.Name = "FatherForm";
-            this.Text = "Form1";
+            this.Text = "烘丝机控制";
             this.Load += new System.EventHandler(this.FatherForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

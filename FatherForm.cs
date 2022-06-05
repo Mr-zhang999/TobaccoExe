@@ -43,6 +43,7 @@ namespace TobaccoExe
 
         private void FatherForm_Load(object sender, EventArgs e)
         {
+            Showform(mainForm);
             this.IsMdiContainer = true;
             //192.168.0.103
             IPAddress ip = GetLocalIPv4Address();
@@ -84,7 +85,7 @@ namespace TobaccoExe
             Socket myClientSocket = (Socket)socket;
             while (socket.Connected)                                                                              //持续监听
             {
-                try
+                //try
                 {
                     byte[] buffer = new byte[1024 * 1024];                                            //定义一个1M的内存缓冲区，用于临时性存储接收到的消息 
                     int receiveLen = myClientSocket.Receive(byteReceBuf);
@@ -124,12 +125,12 @@ namespace TobaccoExe
                         }
                     }
                 }
-                catch (Exception ex)
+/*                catch (Exception ex)
                 {
                     //测试
                     string str1 = ex.Message + '\n';
                     break;
-                }
+                }*/
             }
         }
         private byte[] MsgProcess(byte[] byteVariableSizeBuf, int nStep, out int nOutStep, out int nOK_Flag)
@@ -350,6 +351,33 @@ namespace TobaccoExe
 
             //传递数据到主页面
             SendMsgEventToMain(roll_temp);
+            DateTime Nowtime = DateTime.Now;
+            string strSQL, strTemp;
+            strSQL = "insert into TBL_SENSOR_RECORD(SR_Time,SR_STUFF_WEIGHT,SR_STUFF_WET_IN,SR_STUFF_TEMP_IN,SR_STUFF_WET_OUT,SR_STUFF_TEMP_OUT,SR_AIR_SPEED,SR_SECTION_TEMP1,SR_SECTION_TEMP2,SR_SECTION_TEMP3,SR_SECTION_TEMP4,SR_AIR_TEMP_IN,SR_AIR_TEMP_OUT,SR_ENVIRON_TEMP,SR_ENVIRON_WET,SR_SECTION_TEMP1_BAK,SR_SECTION_TEMP2_BAK,SR_SECTION_TEMP3_BAK,SR_SECTION_TEMP4_BAK)";
+            strTemp = string.Format("{0} values('{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                   (int) (roll_temp[0]*100),
+                   (int)(roll_temp[1] * 100),
+                   (int)(roll_temp[2] * 100),
+                   (int)(roll_temp[3] * 100),
+                   (int)(roll_temp[4] * 100),
+                   (int)(roll_temp[5] * 100),
+                   (int)(roll_temp[6] * 100),
+                   (int)(roll_temp[7] * 100),
+                   (int)(roll_temp[8] * 100),
+                   (int)(roll_temp[9] * 100),
+                   (int)(roll_temp[10] * 100),
+                   (int)(roll_temp[11] * 100),
+                   (int)(roll_temp[12] * 100),
+                   (int)(roll_temp[13] * 100),
+                   -1,
+                   -1,
+                   -1,
+                   -1
+                );
+            strSQL = strTemp;
+            DataOperator.ExecSQL(strSQL);
         }
 
         //高字节在前，低字节在后转换int32
