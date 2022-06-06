@@ -6,7 +6,7 @@ namespace TobaccoApp.dto
 {
     class LimitPara
     {
-
+        // 属性
         private int LP_TYPE;
         private int LP_VALUE;
         
