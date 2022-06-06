@@ -17,7 +17,7 @@ using TobaccoApp;
 namespace TobaccoExe
 {
     public delegate void delegateSendMsgToMainForm(float[] msg);
-    public delegate void delegateSendMsgToSocketnForm(string msg);
+   
     public partial class FatherForm : Form
     {
         Socket serverSocket;//定义socket对象
@@ -26,25 +26,36 @@ namespace TobaccoExe
         Socket socket;
         MainForm mainForm;
         ParaSetForm paraSetForm;
-        ModeSetForm modeSetForm;
+        //极限参数和设定参数
+        public static int[] limitPara = new int[5];
+        //设定参数
+        public static int[] setPara = new int[6];
+        //反吹风电磁阀启动时长和停止时长
+        public static short[] blowbackTIME = new short[2];
+
+
         public static float[] roll_temp;
+        int modeFlag = 2;
+        DateTime Nowtime = DateTime.Now;
+        string defaultOperator = "123456";//默认操作员
         private event delegateSendMsgToMainForm SendMsgEventToMain;
-        private event delegateSendMsgToSocketnForm SendMsgEventToSocket;
+
         public FatherForm()
         {
             InitializeComponent();
-
             mainForm = new MainForm();
-            paraSetForm = new ParaSetForm();
-            modeSetForm = new ModeSetForm();
+            paraSetForm = new ParaSetForm();  
             roll_temp = new float[4] { 0, 0, 0, 0 };
             SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);
+            
         }
 
         private void FatherForm_Load(object sender, EventArgs e)
         {
+
             Showform(mainForm);
-            this.IsMdiContainer = true;
+            //默认操作模式记录
+            modeDataOperSave();
             //192.168.0.103
             IPAddress ip = GetLocalIPv4Address();
 
@@ -77,6 +88,8 @@ namespace TobaccoExe
                 }));
             }
         }
+
+
         public void ReceiveMsg()
         {
             int nOutStep = 0, nOK_Flag = 0, nStep = 0;
@@ -85,11 +98,10 @@ namespace TobaccoExe
             Socket myClientSocket = (Socket)socket;
             while (socket.Connected)                                                                              //持续监听
             {
-                //try
+                try
                 {
                     byte[] buffer = new byte[1024 * 1024];                                            //定义一个1M的内存缓冲区，用于临时性存储接收到的消息 
                     int receiveLen = myClientSocket.Receive(byteReceBuf);
-
                     byteVariableSizeBuf = CPublicFunc.CombineBytes(byteVariableSizeBuf, 0, byteVariableSizeBuf.Length, byteReceBuf, 0, receiveLen);
                     //将客户端套接字接收到的数据存入内存缓冲区，并获取长度  
 
@@ -125,12 +137,12 @@ namespace TobaccoExe
                         }
                     }
                 }
-/*                catch (Exception ex)
+               catch (Exception ex)
                 {
                     //测试
                     string str1 = ex.Message + '\n';
                     break;
-                }*/
+                }
             }
         }
         private byte[] MsgProcess(byte[] byteVariableSizeBuf, int nStep, out int nOutStep, out int nOK_Flag)
@@ -351,7 +363,7 @@ namespace TobaccoExe
 
             //传递数据到主页面
             SendMsgEventToMain(roll_temp);
-            DateTime Nowtime = DateTime.Now;
+            sendCommand();
             string strSQL, strTemp;
             strSQL = "insert into TBL_SENSOR_RECORD(SR_Time,SR_STUFF_WEIGHT,SR_STUFF_WET_IN,SR_STUFF_TEMP_IN,SR_STUFF_WET_OUT,SR_STUFF_TEMP_OUT,SR_AIR_SPEED,SR_SECTION_TEMP1,SR_SECTION_TEMP2,SR_SECTION_TEMP3,SR_SECTION_TEMP4,SR_AIR_TEMP_IN,SR_AIR_TEMP_OUT,SR_ENVIRON_TEMP,SR_ENVIRON_WET,SR_SECTION_TEMP1_BAK,SR_SECTION_TEMP2_BAK,SR_SECTION_TEMP3_BAK,SR_SECTION_TEMP4_BAK)";
             strTemp = string.Format("{0} values('{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19})",
@@ -378,6 +390,66 @@ namespace TobaccoExe
                 );
             strSQL = strTemp;
             DataOperator.ExecSQL(strSQL);
+        }
+
+        private void sendCommand()
+        {
+            //调用算法计算下发命令
+            //极限参数
+            byte[] paraSub = new byte[5];
+            //int[] limit = new int[5] { 10000, 12000, 13000, 14000, 15000 };
+            //滚筒温度设定值和热风出口温度、出口含水率
+            //int[] set = new int[6] { 10000, 12000, 13000, 14000, 15000, 16000 };
+            //反吹风电磁阀启动时长和停止时长
+            //short[] set1 = new short[2] { 5, 5 };
+            byte[] s = new byte[setPara.Length * 4 + blowbackTIME.Length * 2];
+            //设定参数
+            for (int i = 0; i < CPublicFunc.intArrToBytesArr(setPara).Length; i++)
+            {
+                s[i] = CPublicFunc.intArrToBytesArr(setPara)[i];
+            }
+            for (int i = 0; i < CPublicFunc.shortArrToBytesArr(blowbackTIME).Length; i++)
+            {
+                s[setPara.Length + i] = CPublicFunc.shortArrToBytesArr(blowbackTIME)[i];
+            }
+                /*烘丝机运行信号
+                烘丝机允许进料信号
+                排潮 / 除尘请求信号
+                进料传送带电机
+                出料传送带电机
+                转网驱动减速机
+                反吹风电磁阀
+                热风风门定位器
+                滚筒转动变频器
+                热风风机
+                排潮风机
+                滚筒1加热功率等级
+                滚筒2加热功率等级
+                滚筒3加热功率等级
+                滚筒4加热功率等级
+                热风加热功率等级*/
+            byte[] actuatorDrive = new byte[16] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };
+            SendProtocol sendProtocol = new SendProtocol();
+            sendProtocol.Cmd = 0x21;
+            sendProtocol.ParaGeneralMode = 0x00;
+            sendProtocol.ParaSublMode = paraSub;
+            sendProtocol.ParaLimit = CPublicFunc.intArrToBytesArr(limitPara);
+            sendProtocol.ParaSetting = s;
+            sendProtocol.ParaActuatorDrive = actuatorDrive;
+            int limitLength = CPublicFunc.intArrToBytesArr(limitPara).Length;
+            sendProtocol.DataLen = CPublicFunc.shortToBytes((short)(5 + 1 + 5 + paraSub.Length + CPublicFunc.intArrToBytesArr(limitPara).Length + s.Length + actuatorDrive.Length));
+            SendMsg(sendProtocol.ToBytes());
+        }
+        public void SendMsg(byte[] buffer)
+        {
+            if (null != socket)
+            {
+                socket.Send(buffer);
+            }
+            else
+            {
+                MessageBox.Show("请检查Socket是否连接");
+            }
         }
 
         //高字节在前，低字节在后转换int32
@@ -459,5 +531,54 @@ namespace TobaccoExe
         {
             Showform(mainForm);
         }
+
+        private void btn_paraSet_Click(object sender, EventArgs e)
+        {
+            Showform(paraSetForm);
+        }
+
+  
+
+        private void mode_0_Click(object sender, EventArgs e)
+        {
+            modeFlag = 0;
+            modeDataOperSave();
+            this.label_mode.Text = "单点调试模式";
+        }
+
+        private void mode_1_Click(object sender, EventArgs e)
+        {
+            modeFlag = 1;
+            modeDataOperSave();
+            this.label_mode.Text = "预热模式";
+        }
+
+        private void mode_2_Click(object sender, EventArgs e)
+        {
+            modeFlag = 2;
+            modeDataOperSave();
+            this.label_mode.Text = "按参数设定工作模式";
+        }
+
+        private void mode_3_Click(object sender, EventArgs e)
+        {
+            modeFlag = 3;
+            modeDataOperSave();
+            this.label_mode.Text = "自动工作模式";
+        }
+        private void modeDataOperSave()
+        {           
+            string strSQL, strTemp;
+            strSQL = "insert into TBL_SET_MODE(SM_MODIFY_TIME,SM_MODE,SM_OPER_NUMBER)";
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                  modeFlag,
+                  defaultOperator
+                ); 
+            strSQL = strTemp;
+            DataOperator.ExecSQL(strSQL);
+        }
+
     }
 }

@@ -63,12 +63,6 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ModeSetForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ModeSetForm.Designer.cs">
-      <DependentUpon>ModeSetForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ParaSetForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,9 +80,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ModeSetForm.resx">
-      <DependentUpon>ModeSetForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ParaSetForm.resx">
       <DependentUpon>ParaSetForm.cs</DependentUpon>

@@ -38,6 +38,15 @@ namespace TobaccoApp
             string datareader = command.ExecuteScalar().ToString();
             return datareader;
         }
+        public static string GetSetPara(string sql)
+        {
+            SqlCommand command = new SqlCommand(sql, connection);
+            if (connection.State == ConnectionState.Open)
+                connection.Close();
+            connection.Open();
+            string res = command.ExecuteScalar().ToString();
+            return res;
+        }
         public static SqlDataReader GetDataReaderChart(string sql)
         {
             SqlCommand command = new SqlCommand(sql, connection);
