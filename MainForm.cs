@@ -154,7 +154,6 @@ namespace TobaccoApp
             chart1.Series[1].Color = Color.DeepPink;
             chart1.Series[1].BorderWidth = 1;
             chart1.Series[1].Points.DataBindXY(xData, yData);
-
         }
         private void drawLines_Roll_3(List<int> list1, List<float> list2)
         {
@@ -172,17 +171,13 @@ namespace TobaccoApp
             chart1.Series[3].Color = Color.YellowGreen;
             chart1.Series[3].BorderWidth = 1;
             chart1.Series[3].Points.DataBindXY(xData, yData);
-
         }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             getData();
         }
-
         private void chart1_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

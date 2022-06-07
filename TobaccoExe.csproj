@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlgorithmDll.cs" />
+    <Compile Include="algorithm\AlgorithmDll.cs" />
     <Compile Include="dto\LimitPara.cs" />
     <Compile Include="dto\RunRecord.cs" />
     <Compile Include="dto\SensorRecord.cs" />
