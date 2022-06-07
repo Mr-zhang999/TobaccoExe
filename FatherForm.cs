@@ -42,12 +42,15 @@ namespace TobaccoExe
 
         public FatherForm()
         {
+
             InitializeComponent();
+
+/*           AlgorithmDll algorithmDll = new AlgorithmDll();
+           double  a = algorithmDll.fuzzyDllCac(5, 2);*/
             mainForm = new MainForm();
             paraSetForm = new ParaSetForm();  
             roll_temp = new float[4] { 0, 0, 0, 0 };
-            SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);
-            
+            SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);           
         }
 
         private void FatherForm_Load(object sender, EventArgs e)
@@ -56,7 +59,7 @@ namespace TobaccoExe
             Showform(mainForm);
             //默认操作模式记录
             modeDataOperSave();
-            //192.168.0.103
+            //192.168.2.5
             IPAddress ip = GetLocalIPv4Address();
 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);//定义一个socket
