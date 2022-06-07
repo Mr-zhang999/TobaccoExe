@@ -1,0 +1,12 @@
+﻿  fun.c
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fun.c(15): warning C4101: “data_file”: 未引用的局部变量
+  fis.c
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fis.c(2156): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fis.c(2157): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fis.c(2324): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fis.c(2343): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fis.c(2362): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+  正在生成代码...
+c:\users\10418\desktop\c#测试\fuzyydll\fuzyydll\fun.c(78): warning C4715: “cacFuzzy”: 不是所有的控件路径都返回值
+     正在创建库 C:\Users\10418\Desktop\c#测试\fuzyyDll\Debug\fuzyyDll.lib 和对象 C:\Users\10418\Desktop\c#测试\fuzyyDll\Debug\fuzyyDll.exp
+  fuzyyDll.vcxproj -> C:\Users\10418\Desktop\c#测试\fuzyyDll\Debug\fuzyyDll.dll
