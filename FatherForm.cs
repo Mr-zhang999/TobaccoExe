@@ -26,6 +26,7 @@ namespace TobaccoExe
         Socket socket;
         MainForm mainForm;
         ParaSetForm paraSetForm;
+        AlgorithmDll algorithmDll = new AlgorithmDll();
         //极限参数和设定参数
         public static int[] limitPara = new int[5];
         //设定参数
@@ -33,8 +34,30 @@ namespace TobaccoExe
         //反吹风电磁阀启动时长和停止时长
         public static short[] blowbackTIME = new short[2];
 
+        //开关量
+        /*        烘丝机运行信号
+                    烘丝机允许进料信号
+                    排潮 / 除尘请求信号
+                    进料传送带电机
+                    出料传送带电机
+                    转网驱动减速机
+                    反吹风电磁阀
+                    热风风门定位器
+                    滚筒转动变频器
+                    热风风机
+                    排潮风机*/
+        byte[] switchingValue;
+        //加热信号
+        /*
+        滚筒1加热功率等级
+        滚筒2加热功率等级
+        滚筒3加热功率等级
+        滚筒4加热功率等级
+        热风加热功率等级*/
+        byte[] heatingValue = new byte[5];
 
-        public static float[] roll_temp;
+
+        public static float[] sensorData;
         int modeFlag = 2;
         DateTime Nowtime = DateTime.Now;
         string defaultOperator = "123456";//默认操作员
@@ -45,11 +68,10 @@ namespace TobaccoExe
 
             InitializeComponent();
 
-/*           AlgorithmDll algorithmDll = new AlgorithmDll();
-           double  a = algorithmDll.fuzzyDllCac(5, 2);*/
+
             mainForm = new MainForm();
-            paraSetForm = new ParaSetForm();  
-            roll_temp = new float[4] { 0, 0, 0, 0 };
+            paraSetForm = new ParaSetForm();
+           // sensorData = new float[4] { 0, 0, 0, 0 };
             SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);           
         }
 
@@ -91,8 +113,6 @@ namespace TobaccoExe
                 }));
             }
         }
-
-
         public void ReceiveMsg()
         {
             int nOutStep = 0, nOK_Flag = 0, nStep = 0;
@@ -107,7 +127,6 @@ namespace TobaccoExe
                     int receiveLen = myClientSocket.Receive(byteReceBuf);
                     byteVariableSizeBuf = CPublicFunc.CombineBytes(byteVariableSizeBuf, 0, byteVariableSizeBuf.Length, byteReceBuf, 0, receiveLen);
                     //将客户端套接字接收到的数据存入内存缓冲区，并获取长度  
-
                     while (byteVariableSizeBuf.Length > 0)
                     {
                         byteVariableSizeBuf = MsgProcess(byteVariableSizeBuf, nStep, out nOutStep, out nOK_Flag);
@@ -143,7 +162,7 @@ namespace TobaccoExe
                catch (Exception ex)
                 {
                     //测试
-                    string str1 = ex.Message + '\n';
+                    MessageBox.Show("发生错误" + ex.Message);
                     break;
                 }
             }
@@ -323,69 +342,83 @@ namespace TobaccoExe
         public void dataProcessing(byte[] byteVariableSizeBuf)
         {
             SensorRecord sensorRecord = new SensorRecord();
-            roll_temp = new float[14];
+            sensorData = new float[14];
             //进口物料重量
             float weight_in = byteToFloat(byteVariableSizeBuf, 24);
-            roll_temp[0] = weight_in;
+            sensorData[0] = weight_in;
             //进口物料含水率
             float wet_in = byteToFloat(byteVariableSizeBuf, 28);
-            roll_temp[1] = wet_in;
+            sensorData[1] = wet_in;
             //进口物料温度
             float temp_in = byteToFloat(byteVariableSizeBuf, 32);
-            roll_temp[2] = temp_in;
+            sensorData[2] = temp_in;
             //出口物料水分实际值
             float wet_out = byteToFloat(byteVariableSizeBuf, 38);
-            roll_temp[3] = wet_out;
+            sensorData[3] = wet_out;
             //出口物料温度实际值
             float temp_out = byteToFloat(byteVariableSizeBuf, 42);
-            roll_temp[4] = temp_out;
+            sensorData[4] = temp_out;
             //热风流量
             float air_speed = byteToFloat(byteVariableSizeBuf, 46);
-            roll_temp[5] = air_speed;
+            sensorData[5] = air_speed;
             //滚筒温度
             float section_temp1 = byteToFloat(byteVariableSizeBuf, 50);
             float section_temp2 = byteToFloat(byteVariableSizeBuf, 54);
             float section_temp3 = byteToFloat(byteVariableSizeBuf, 58);
             float section_temp4 = byteToFloat(byteVariableSizeBuf, 62);
-            roll_temp[6] = section_temp1;
-            roll_temp[7] = section_temp2;
-            roll_temp[8] = section_temp3;
-            roll_temp[9] = section_temp4;
+            sensorData[6] = section_temp1;
+            sensorData[7] = section_temp2;
+            sensorData[8] = section_temp3;
+            sensorData[9] = section_temp4;
             //热风出口温度
             float air_temp_out = byteToFloat(byteVariableSizeBuf, 66);
-            roll_temp[10] = air_temp_out;
+            sensorData[10] = air_temp_out;
             //热风回风口温度
             float air_temp_out_in = byteToFloat(byteVariableSizeBuf, 70);
-            roll_temp[11] = air_temp_out_in;
+            sensorData[11] = air_temp_out_in;
             //环境温度
             float environ_temp = byteToFloat(byteVariableSizeBuf, 74);
-            roll_temp[12] = environ_temp;
+            sensorData[12] = environ_temp;
             //环境湿度
             float environ_wet = byteToFloat(byteVariableSizeBuf, 78);
-            roll_temp[13] = environ_wet;
-
+            sensorData[13] = environ_wet;
             //传递数据到主页面
-            SendMsgEventToMain(roll_temp);
+            SendMsgEventToMain(sensorData);
+            //将滚筒温度信息和热风温度信息放一起，用于算法计算
+            double[] realTemp = new double[5];
+            realTemp[0] = section_temp1;
+            realTemp[1] = section_temp2;
+            realTemp[2] = section_temp3;
+            realTemp[3] = section_temp4;
+            realTemp[4] = air_temp_out;
+
+            double[] targetTemp = new double[5];
+            targetTemp[0] = setPara[0];
+            targetTemp[1] = setPara[1];
+            targetTemp[2] = setPara[2];
+            targetTemp[3] = setPara[3];
+            targetTemp[4] = setPara[4];
+            cacAlgorithmAns(realTemp, targetTemp);
             sendCommand();
             string strSQL, strTemp;
             strSQL = "insert into TBL_SENSOR_RECORD(SR_Time,SR_STUFF_WEIGHT,SR_STUFF_WET_IN,SR_STUFF_TEMP_IN,SR_STUFF_WET_OUT,SR_STUFF_TEMP_OUT,SR_AIR_SPEED,SR_SECTION_TEMP1,SR_SECTION_TEMP2,SR_SECTION_TEMP3,SR_SECTION_TEMP4,SR_AIR_TEMP_IN,SR_AIR_TEMP_OUT,SR_ENVIRON_TEMP,SR_ENVIRON_WET,SR_SECTION_TEMP1_BAK,SR_SECTION_TEMP2_BAK,SR_SECTION_TEMP3_BAK,SR_SECTION_TEMP4_BAK)";
             strTemp = string.Format("{0} values('{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19})",
                     strSQL,
                     string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
-                   (int) (roll_temp[0]*100),
-                   (int)(roll_temp[1] * 100),
-                   (int)(roll_temp[2] * 100),
-                   (int)(roll_temp[3] * 100),
-                   (int)(roll_temp[4] * 100),
-                   (int)(roll_temp[5] * 100),
-                   (int)(roll_temp[6] * 100),
-                   (int)(roll_temp[7] * 100),
-                   (int)(roll_temp[8] * 100),
-                   (int)(roll_temp[9] * 100),
-                   (int)(roll_temp[10] * 100),
-                   (int)(roll_temp[11] * 100),
-                   (int)(roll_temp[12] * 100),
-                   (int)(roll_temp[13] * 100),
+                   (int) (sensorData[0]*100),
+                   (int)(sensorData[1] * 100),
+                   (int)(sensorData[2] * 100),
+                   (int)(sensorData[3] * 100),
+                   (int)(sensorData[4] * 100),
+                   (int)(sensorData[5] * 100),
+                   (int)(sensorData[6] * 100),
+                   (int)(sensorData[7] * 100),
+                   (int)(sensorData[8] * 100),
+                   (int)(sensorData[9] * 100),
+                   (int)(sensorData[10] * 100),
+                   (int)(sensorData[11] * 100),
+                   (int)(sensorData[12] * 100),
+                   (int)(sensorData[13] * 100),
                    -1,
                    -1,
                    -1,
@@ -399,48 +432,45 @@ namespace TobaccoExe
         {
             //调用算法计算下发命令
             //极限参数
-            byte[] paraSub = new byte[5];
-            //int[] limit = new int[5] { 10000, 12000, 13000, 14000, 15000 };
-            //滚筒温度设定值和热风出口温度、出口含水率
-            //int[] set = new int[6] { 10000, 12000, 13000, 14000, 15000, 16000 };
-            //反吹风电磁阀启动时长和停止时长
-            //short[] set1 = new short[2] { 5, 5 };
-            byte[] s = new byte[setPara.Length * 4 + blowbackTIME.Length * 2];
+
+            //加热模式、暂时写死
+            byte[] paraSubMode = new byte[5];
+
+            //设定参数 和 热风启动、关闭时长
+            byte[] paraSetAndBlowbackTime = new byte[setPara.Length * 4 + blowbackTIME.Length * 2];
             //设定参数
             for (int i = 0; i < CPublicFunc.intArrToBytesArr(setPara).Length; i++)
             {
-                s[i] = CPublicFunc.intArrToBytesArr(setPara)[i];
+                paraSetAndBlowbackTime[i] = CPublicFunc.intArrToBytesArr(setPara)[i];
             }
             for (int i = 0; i < CPublicFunc.shortArrToBytesArr(blowbackTIME).Length; i++)
             {
-                s[setPara.Length + i] = CPublicFunc.shortArrToBytesArr(blowbackTIME)[i];
+                paraSetAndBlowbackTime[setPara.Length + i] = CPublicFunc.shortArrToBytesArr(blowbackTIME)[i];
             }
-                /*烘丝机运行信号
-                烘丝机允许进料信号
-                排潮 / 除尘请求信号
-                进料传送带电机
-                出料传送带电机
-                转网驱动减速机
-                反吹风电磁阀
-                热风风门定位器
-                滚筒转动变频器
-                热风风机
-                排潮风机
-                滚筒1加热功率等级
-                滚筒2加热功率等级
-                滚筒3加热功率等级
-                滚筒4加热功率等级
-                热风加热功率等级*/
-            byte[] actuatorDrive = new byte[16] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };
+
+            //开关量如何控？暂定
+            switchingValue =new byte[11]{0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
+
+            //switchingValue + heatingValue = actuatorDrive
+            byte[] actuatorDrive = new byte[switchingValue.Length + heatingValue.Length];
+            int j = 0;
+            for(;j< switchingValue.Length; j++)
+            {
+                actuatorDrive[j] = switchingValue[j];
+            }
+            for(;j<switchingValue.Length + heatingValue.Length; j++)
+            {
+                actuatorDrive[j] = heatingValue[j-11];
+            }
             SendProtocol sendProtocol = new SendProtocol();
             sendProtocol.Cmd = 0x21;
             sendProtocol.ParaGeneralMode = 0x00;
-            sendProtocol.ParaSublMode = paraSub;
+            sendProtocol.ParaSublMode = paraSubMode;
             sendProtocol.ParaLimit = CPublicFunc.intArrToBytesArr(limitPara);
-            sendProtocol.ParaSetting = s;
+            sendProtocol.ParaSetting = paraSetAndBlowbackTime;
             sendProtocol.ParaActuatorDrive = actuatorDrive;
             int limitLength = CPublicFunc.intArrToBytesArr(limitPara).Length;
-            sendProtocol.DataLen = CPublicFunc.shortToBytes((short)(5 + 1 + 5 + paraSub.Length + CPublicFunc.intArrToBytesArr(limitPara).Length + s.Length + actuatorDrive.Length));
+            sendProtocol.DataLen = CPublicFunc.shortToBytes((short)(5 + 1 + 5 + paraSubMode.Length + CPublicFunc.intArrToBytesArr(limitPara).Length + paraSubMode.Length + actuatorDrive.Length));
             SendMsg(sendProtocol.ToBytes());
         }
         public void SendMsg(byte[] buffer)
@@ -454,7 +484,6 @@ namespace TobaccoExe
                 MessageBox.Show("请检查Socket是否连接");
             }
         }
-
         //高字节在前，低字节在后转换int32
         public int bytesToInt(byte[] src, int offset)
         {
@@ -534,14 +563,10 @@ namespace TobaccoExe
         {
             Showform(mainForm);
         }
-
         private void btn_paraSet_Click(object sender, EventArgs e)
         {
             Showform(paraSetForm);
         }
-
-  
-
         private void mode_0_Click(object sender, EventArgs e)
         {
             modeFlag = 0;
@@ -582,6 +607,26 @@ namespace TobaccoExe
             strSQL = strTemp;
             DataOperator.ExecSQL(strSQL);
         }
-
+        double[] lastTemperature = new double[5] { 0,0,0,0,0};
+        private  void cacAlgorithmAns(double[] reaTimeTemperature, double[] TargetTemperature)
+        {
+            double e = 0, ec = 0;
+            //两输入单输出、传入e 和 ec
+            for (int i = 0; i < 5; i++)
+            {
+                e = TargetTemperature[i] - reaTimeTemperature[i];
+                //除以5，根据时间定，上来数据间隔时间
+                ec = (TargetTemperature[i] - lastTemperature[i]) / 5;
+               int res = getAlgorithmAns(e, ec);               
+               heatingValue[i] = Convert.ToByte(res);
+            }
+            //将本次的数据保存至下次数据来，用于计算ec
+            lastTemperature = reaTimeTemperature;
+        }
+        private int getAlgorithmAns(double a,double b)
+        {
+            int res =(int) algorithmDll.fuzzyDllCac(a, b);
+            return res;
+        }
     }
 }
