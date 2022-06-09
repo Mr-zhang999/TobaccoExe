@@ -26,6 +26,7 @@ namespace TobaccoExe
         Socket socket;
         MainForm mainForm;
         ParaSetForm paraSetForm;
+        HistoryGraphical historyGraphical;
         AlgorithmDll algorithmDll = new AlgorithmDll();
         //极限参数和设定参数
         public static int[] limitPara = new int[5];
@@ -104,6 +105,7 @@ namespace TobaccoExe
             InitializeComponent();
             mainForm = new MainForm();
             paraSetForm = new ParaSetForm();
+            historyGraphical = new HistoryGraphical();
             SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);           
         }
         private void FatherForm_Load(object sender, EventArgs e)
@@ -794,6 +796,9 @@ namespace TobaccoExe
             res[10] = Convert.ToByte(runRecordStruct.TideFan);           
             return res;
         }
-
+        private void historyMsg_Click(object sender, EventArgs e)
+        {
+            Showform(historyGraphical);
+        }
     }
 }

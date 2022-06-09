@@ -58,6 +58,12 @@
     <Compile Include="FatherForm.Designer.cs">
       <DependentUpon>FatherForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HistoryGraphical.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HistoryGraphical.Designer.cs">
+      <DependentUpon>HistoryGraphical.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -78,6 +84,9 @@
     <Compile Include="public\ServiceHelp.cs" />
     <EmbeddedResource Include="FatherForm.resx">
       <DependentUpon>FatherForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HistoryGraphical.resx">
+      <DependentUpon>HistoryGraphical.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
