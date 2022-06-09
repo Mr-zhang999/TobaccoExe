@@ -42,6 +42,7 @@ namespace TobaccoExe
             this.mode_3 = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.label_mode = new System.Windows.Forms.Label();
+            this.historyMsg = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -158,11 +159,22 @@ namespace TobaccoExe
             this.label_mode.TabIndex = 8;
             this.label_mode.Text = "参数设定工作模式";
             // 
+            // historyMsg
+            // 
+            this.historyMsg.Location = new System.Drawing.Point(393, 35);
+            this.historyMsg.Name = "historyMsg";
+            this.historyMsg.Size = new System.Drawing.Size(118, 37);
+            this.historyMsg.TabIndex = 9;
+            this.historyMsg.Text = "历史数据查询";
+            this.historyMsg.UseVisualStyleBackColor = true;
+            this.historyMsg.Click += new System.EventHandler(this.historyMsg_Click);
+            // 
             // FatherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 776);
+            this.Controls.Add(this.historyMsg);
             this.Controls.Add(this.label_mode);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.connect_status);
@@ -197,6 +209,7 @@ namespace TobaccoExe
         private System.Windows.Forms.ToolStripMenuItem mode_3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label_mode;
+        private System.Windows.Forms.Button historyMsg;
     }
 }
 
