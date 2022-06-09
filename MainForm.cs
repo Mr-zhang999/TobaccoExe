@@ -49,7 +49,13 @@ namespace TobaccoApp
             this.label_environ_temp.Text = msg[12].ToString();
             this.label_environ_wet.Text = msg[13].ToString();
 
-            getData();
+
+            //不使用委托方式会出问题，，，不理解
+            this.Invoke(new Action(() =>
+            {
+                getData();
+            }));
+
         }
         public MainForm()
         {
@@ -71,37 +77,37 @@ namespace TobaccoApp
 
         private void getData()
         {
-            id_1_List.Add(id_1);
-            id_2_List.Add(id_2);
-            id_3_List.Add(id_3);
-            id_4_List.Add(id_4);
-            id_1++;
-            id_2++;
-            id_3++;
-            id_4++;
-            if (id_1 > 199) id_1 = 199;
-            if (id_2 > 199) id_2 = 199;
-            if (id_3 > 199) id_3 = 199;
-            if (id_4 > 199) id_4 = 199;
-            roll_1_List.Add(msgChart[0]);
-            roll_2_List.Add(msgChart[1]);
-            roll_3_List.Add(msgChart[2]);
-            roll_4_List.Add(msgChart[3]);
+                id_1_List.Add(id_1);
+                id_2_List.Add(id_2);
+                id_3_List.Add(id_3);
+                id_4_List.Add(id_4);
+                id_1++;
+                id_2++;
+                id_3++;
+                id_4++;
+                if (id_1 > 199) id_1 = 199;
+                if (id_2 > 199) id_2 = 199;
+                if (id_3 > 199) id_3 = 199;
+                if (id_4 > 199) id_4 = 199;
+                roll_1_List.Add(msgChart[0]);
+                roll_2_List.Add(msgChart[1]);
+                roll_3_List.Add(msgChart[2]);
+                roll_4_List.Add(msgChart[3]);
             //画图函数
             drawLines_Roll_1(id_1_List, roll_1_List);
             drawLines_Roll_2(id_2_List, roll_2_List);
             drawLines_Roll_3(id_3_List, roll_3_List);
             drawLines_Roll_4(id_4_List, roll_4_List);
-            if (roll_1_List.Count >= 200)
+            if (roll_1_List.Count >= 100)
             {
                 roll_1_List.RemoveAt(0);
                 id_1_List.RemoveAt(0);
                 for (int i = 0; i < id_1_List.Count; i++)
                 {
-                    id_1_List[i] -= 1;
+                    id_1_List[i]--;
                 }
             }
-            if (roll_2_List.Count >= 200)
+            if (roll_2_List.Count >= 100)
             {
                 roll_2_List.RemoveAt(0);
                 id_2_List.RemoveAt(0);
@@ -110,7 +116,7 @@ namespace TobaccoApp
                     id_2_List[i]--;
                 }
             }
-            if (roll_3_List.Count >= 200)
+            if (roll_3_List.Count >= 100)
             {
                 roll_3_List.RemoveAt(0);
                 id_3_List.RemoveAt(0);
@@ -119,21 +125,21 @@ namespace TobaccoApp
                     id_3_List[i]--;
                 }
             }
-            if (roll_4_List.Count >= 200)
+            if (roll_4_List.Count >= 100)
             {
                 roll_4_List.RemoveAt(0);
                 id_4_List.RemoveAt(0);
+
                 for (int i = 0; i < id_1_List.Count; i++)
                 {
                     id_4_List[i]--;
                 }
             }
-
         }
-        public void drawLines_Roll_1(List<int> list1, List<float> list2)
+        public void drawLines_Roll_1(List<int> xData, List<float> yData)
         {
-            List<int> xData = list1;
-            List<float> yData = list2;
+/*            List<int> xData = list1;
+            List<float> yData = list2;*/
             //线条颜色
             chart1.Series[0].Color = Color.DeepSkyBlue;
             //线条粗细
@@ -148,28 +154,21 @@ namespace TobaccoApp
             chart1.Series[0].Points.DataBindXY(xData, yData);
 
         }
-        private void drawLines_Roll_2(List<int> list1, List<float> list2)
+        private void drawLines_Roll_2(List<int> xData, List<float> yData)
         {
-            List<int> xData = list1;
-            List<float> yData = list2;
-
             chart1.Series[1].Color = Color.DeepPink;
             chart1.Series[1].BorderWidth = 1;
             chart1.Series[1].Points.DataBindXY(xData, yData);
         }
-        private void drawLines_Roll_3(List<int> list1, List<float> list2)
+        private void drawLines_Roll_3(List<int> xData, List<float> yData)
         {
-            List<int> xData = list1;
-            List<float> yData = list2;
             chart1.Series[2].Color = Color.Black;
             chart1.Series[2].BorderWidth = 1;
             chart1.Series[2].Points.DataBindXY(xData, yData);
 
         }
-        private void drawLines_Roll_4(List<int> list1, List<float> list2)
+        private void drawLines_Roll_4(List<int> xData, List<float> yData)
         {
-            List<int> xData = list1;
-            List<float> yData = list2;
             chart1.Series[3].Color = Color.YellowGreen;
             chart1.Series[3].BorderWidth = 1;
             chart1.Series[3].Points.DataBindXY(xData, yData);
