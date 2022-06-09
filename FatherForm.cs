@@ -92,10 +92,8 @@ namespace TobaccoExe
         滚筒2加热功率等级
         滚筒3加热功率等级
         滚筒4加热功率等级
-        热风加热功率等级*/
-        
-        byte[] heatingValue = new byte[5];
-         
+        热风加热功率等级*/  
+        byte[] heatingValue = new byte[5];        
         public static float[] sensorData;
         int modeFlag = 2;
         DateTime Nowtime = DateTime.Now;
@@ -459,7 +457,6 @@ namespace TobaccoExe
         private void sendCommand()
         {
             //调用算法计算下发命令
-            //极限参数
             //加热模式、暂时写死
             byte[] paraSubMode = new byte[5];
 
@@ -488,7 +485,6 @@ namespace TobaccoExe
             sendProtocol.DataLen = CPublicFunc.shortToBytes((short)(5 + 1 + 5 + paraSubMode.Length + CPublicFunc.intArrToBytesArr(limitPara).Length + paraSubMode.Length + actuatorDrive.Length));
             SendMsg(sendProtocol.ToBytes());
         }
-
         public void SendMsg(byte[] buffer)
         {
             if (null != socket)
@@ -589,21 +585,18 @@ namespace TobaccoExe
             modeDataOperSave();
             this.label_mode.Text = "单点调试模式";
         }
-
         private void mode_1_Click(object sender, EventArgs e)
         {
             modeFlag = 1;
             modeDataOperSave();
             this.label_mode.Text = "预热模式";
         }
-
         private void mode_2_Click(object sender, EventArgs e)
         {
             modeFlag = 2;
             modeDataOperSave();
             this.label_mode.Text = "按参数设定工作模式";
         }
-
         private void mode_3_Click(object sender, EventArgs e)
         {
             modeFlag = 3;
@@ -631,8 +624,7 @@ namespace TobaccoExe
             runRecordStruct.rollPower_2 = value[1];
             runRecordStruct.rollPower_3 = value[2];
             runRecordStruct.rollPower_4 = value[3];
-            runRecordStruct.hotAirPower = value[4];
-            
+            runRecordStruct.hotAirPower = value[4];  
             byte[] switchAndMotorSignalValue =  switchAndMotorSignal();
 
             byte[] res = new byte[switchAndMotorSignalValue.Length + heatingValue.Length];
@@ -769,10 +761,10 @@ namespace TobaccoExe
         }
         private int getAlgorithmAns(double a,double b)
         {
+            //调用动态链接库进行计算、、、需要换成其它算法，在此更改
             int res =(int) algorithmDll.fuzzyDllCac(a, b);
             return res;
         }
-
         private byte[] switchAndMotorSignal()
         {
 
