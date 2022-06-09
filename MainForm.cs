@@ -48,6 +48,8 @@ namespace TobaccoApp
             this.label_air_temp_out_in.Text = msg[11].ToString();
             this.label_environ_temp.Text = msg[12].ToString();
             this.label_environ_wet.Text = msg[13].ToString();
+
+            getData();
         }
         public MainForm()
         {
@@ -174,7 +176,7 @@ namespace TobaccoApp
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
-            getData();
+         
         }
         private void chart1_Click(object sender, EventArgs e)
         {
