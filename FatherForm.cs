@@ -33,7 +33,12 @@ namespace TobaccoExe
         public static int[] setPara = new int[6];
         //反吹风电磁阀启动时长和停止时长
         public static short[] blowbackTIME = new short[2];
-
+        //实时温度数据
+        double[] realTemp = new double[5];
+        //目标温度数据
+        double[] targetTemp = new double[5];
+        //上一帧温度数据
+        double[] lastTemperature = new double[5] { 0, 0, 0, 0, 0 };
         //开关量
         /*        烘丝机运行信号
                     烘丝机允许进料信号
@@ -46,7 +51,41 @@ namespace TobaccoExe
                     滚筒转动变频器
                     热风风机
                     排潮风机*/
-        byte[] switchingValue;
+        RunRecordStruct runRecordStruct = new RunRecordStruct();
+        public struct RunRecordStruct
+        {
+          //烘丝机运行信号
+          public int OperatingSignal;
+            //烘丝机允许进料信号
+            public int allowFeedIn;
+            //排潮/除尘请求信号
+            public int tideAndDustSignal;
+            //进料电机
+            public int feedInMotor;
+            //出料电机
+            public int feedOutMotor;
+            //转网驱动减速机
+            public int TransfeDriveMotor;
+            //反吹风电磁阀
+            public int BlowbackValve;
+            //热风风门定位器
+            public int HotAirPositioner;
+            //滚筒转动变频器
+            public int rollFreq;
+            //热风风机
+            public int hotAirFan;
+            //排潮风机
+            public int TideFan;
+            //滚筒加热功率等级
+            public int rollPower_1;
+            public int rollPower_2;
+            public int rollPower_3;
+            public int rollPower_4;
+            //热风加热功率等级
+            public int hotAirPower;
+            // 维修使用接近开关
+            public int MaintenanceSwitch;
+        }
         //加热信号
         /*
         滚筒1加热功率等级
@@ -54,36 +93,28 @@ namespace TobaccoExe
         滚筒3加热功率等级
         滚筒4加热功率等级
         热风加热功率等级*/
+        
         byte[] heatingValue = new byte[5];
-
-
+         
         public static float[] sensorData;
         int modeFlag = 2;
         DateTime Nowtime = DateTime.Now;
         string defaultOperator = "123456";//默认操作员
         private event delegateSendMsgToMainForm SendMsgEventToMain;
-
         public FatherForm()
         {
-
             InitializeComponent();
-
-
             mainForm = new MainForm();
             paraSetForm = new ParaSetForm();
-           // sensorData = new float[4] { 0, 0, 0, 0 };
             SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);           
         }
-
         private void FatherForm_Load(object sender, EventArgs e)
         {
-
             Showform(mainForm);
             //默认操作模式记录
             modeDataOperSave();
             //192.168.2.5
             IPAddress ip = GetLocalIPv4Address();
-
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);//定义一个socket
             try
             {
@@ -145,9 +176,7 @@ namespace TobaccoExe
                             Signalcheck(byteVariableSizeBuf);
                             //数据处理
                             dataProcessing(byteVariableSizeBuf);
-
                             //去除已处理一帧数据，返回新的字节数组，继续循环处理
-
                             byteVariableSizeBuf = CPublicFunc.LeftShiftBuffer(CPublicFunc.Convert_ByteToInt32(byteVariableSizeBuf[3], byteVariableSizeBuf[2]) + 2, byteVariableSizeBuf);
                             nStep = 0;
                         }
@@ -384,21 +413,21 @@ namespace TobaccoExe
             sensorData[13] = environ_wet;
             //传递数据到主页面
             SendMsgEventToMain(sensorData);
+
             //将滚筒温度信息和热风温度信息放一起，用于算法计算
-            double[] realTemp = new double[5];
             realTemp[0] = section_temp1;
             realTemp[1] = section_temp2;
             realTemp[2] = section_temp3;
             realTemp[3] = section_temp4;
             realTemp[4] = air_temp_out;
 
-            double[] targetTemp = new double[5];
             targetTemp[0] = setPara[0];
             targetTemp[1] = setPara[1];
             targetTemp[2] = setPara[2];
             targetTemp[3] = setPara[3];
             targetTemp[4] = setPara[4];
-            cacAlgorithmAns(realTemp, targetTemp);
+
+            //下发数据
             sendCommand();
             string strSQL, strTemp;
             strSQL = "insert into TBL_SENSOR_RECORD(SR_Time,SR_STUFF_WEIGHT,SR_STUFF_WET_IN,SR_STUFF_TEMP_IN,SR_STUFF_WET_OUT,SR_STUFF_TEMP_OUT,SR_AIR_SPEED,SR_SECTION_TEMP1,SR_SECTION_TEMP2,SR_SECTION_TEMP3,SR_SECTION_TEMP4,SR_AIR_TEMP_IN,SR_AIR_TEMP_OUT,SR_ENVIRON_TEMP,SR_ENVIRON_WET,SR_SECTION_TEMP1_BAK,SR_SECTION_TEMP2_BAK,SR_SECTION_TEMP3_BAK,SR_SECTION_TEMP4_BAK)";
@@ -427,18 +456,15 @@ namespace TobaccoExe
             strSQL = strTemp;
             DataOperator.ExecSQL(strSQL);
         }
-
         private void sendCommand()
         {
             //调用算法计算下发命令
             //极限参数
-
             //加热模式、暂时写死
             byte[] paraSubMode = new byte[5];
 
-            //设定参数 和 热风启动、关闭时长
+            //设定参数 和 热风启动、关闭时长 -- 数据来源 -- 参数设置页面
             byte[] paraSetAndBlowbackTime = new byte[setPara.Length * 4 + blowbackTIME.Length * 2];
-            //设定参数
             for (int i = 0; i < CPublicFunc.intArrToBytesArr(setPara).Length; i++)
             {
                 paraSetAndBlowbackTime[i] = CPublicFunc.intArrToBytesArr(setPara)[i];
@@ -447,21 +473,10 @@ namespace TobaccoExe
             {
                 paraSetAndBlowbackTime[setPara.Length + i] = CPublicFunc.shortArrToBytesArr(blowbackTIME)[i];
             }
-
-            //开关量如何控？暂定
-            switchingValue =new byte[11]{0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
-
-            //switchingValue + heatingValue = actuatorDrive
-            byte[] actuatorDrive = new byte[switchingValue.Length + heatingValue.Length];
-            int j = 0;
-            for(;j< switchingValue.Length; j++)
-            {
-                actuatorDrive[j] = switchingValue[j];
-            }
-            for(;j<switchingValue.Length + heatingValue.Length; j++)
-            {
-                actuatorDrive[j] = heatingValue[j-11];
-            }
+           //计算下发的执行机构数据
+            byte[] actuatorDrive = runRecordCac();
+            //将运行数据存入run_record表
+            insertIntoRunRecord();
             SendProtocol sendProtocol = new SendProtocol();
             sendProtocol.Cmd = 0x21;
             sendProtocol.ParaGeneralMode = 0x00;
@@ -473,6 +488,7 @@ namespace TobaccoExe
             sendProtocol.DataLen = CPublicFunc.shortToBytes((short)(5 + 1 + 5 + paraSubMode.Length + CPublicFunc.intArrToBytesArr(limitPara).Length + paraSubMode.Length + actuatorDrive.Length));
             SendMsg(sendProtocol.ToBytes());
         }
+
         public void SendMsg(byte[] buffer)
         {
             if (null != socket)
@@ -607,26 +623,185 @@ namespace TobaccoExe
             strSQL = strTemp;
             DataOperator.ExecSQL(strSQL);
         }
-        double[] lastTemperature = new double[5] { 0,0,0,0,0};
-        private  void cacAlgorithmAns(double[] reaTimeTemperature, double[] TargetTemperature)
+        private byte[] runRecordCac()
         {
+            //调用算法计算滚筒加热等级和热风加热等级
+            int[] value = cacAlgorithmAns(realTemp, targetTemp);
+            runRecordStruct.rollPower_1 = value[0];
+            runRecordStruct.rollPower_2 = value[1];
+            runRecordStruct.rollPower_3 = value[2];
+            runRecordStruct.rollPower_4 = value[3];
+            runRecordStruct.hotAirPower = value[4];
+            
+            byte[] switchAndMotorSignalValue =  switchAndMotorSignal();
+
+            byte[] res = new byte[switchAndMotorSignalValue.Length + heatingValue.Length];
+            int j = 0;
+            for (; j < switchAndMotorSignalValue.Length; j++)
+            {
+                res[j] = switchAndMotorSignalValue[j];
+            }
+            for (; j < switchAndMotorSignalValue.Length + heatingValue.Length; j++)
+            {
+                res[j] = switchAndMotorSignalValue[j - 11];
+            }
+            return res;
+        }
+        private void insertIntoRunRecord()
+        {
+            string strSQL, strTemp;
+            strSQL = "insert into TBL_RUN_RECORD(RR_Time,RR_TYPE,RR_VALUE)";
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    0,
+                   runRecordStruct.feedInMotor
+                );
+            DataOperator.ExecSQL(strTemp);           
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    1,
+                   runRecordStruct.feedOutMotor
+                );
+            DataOperator.ExecSQL(strTemp);           
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    2,
+                   runRecordStruct.TransfeDriveMotor
+                );
+            DataOperator.ExecSQL(strTemp);
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    3,
+                   runRecordStruct.BlowbackValve
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    4,
+                   runRecordStruct.HotAirPositioner
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    5,
+                   runRecordStruct.rollFreq
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    6,
+                   runRecordStruct.hotAirFan
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    7,
+                   runRecordStruct.TideFan
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    8,
+                    runRecordStruct.rollPower_1
+
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    9,
+                    runRecordStruct.rollPower_2
+
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    10,
+                    runRecordStruct.rollPower_3
+
+                );
+            DataOperator.ExecSQL(strTemp);            
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    11,
+                    runRecordStruct.rollPower_4
+
+                );
+            DataOperator.ExecSQL(strTemp);           
+            strTemp = string.Format("{0} values('{1}',{2},{3})",
+                    strSQL,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}", Nowtime),
+                    12,
+                    runRecordStruct.hotAirPower
+
+                );
+            DataOperator.ExecSQL(strTemp);            
+        }
+        private  int[] cacAlgorithmAns(double[] reaTimeTemperature, double[] TargetTemperature)
+        {
+            int[] heatingValueInt = new int[5];
             double e = 0, ec = 0;
             //两输入单输出、传入e 和 ec
             for (int i = 0; i < 5; i++)
             {
                 e = TargetTemperature[i] - reaTimeTemperature[i];
-                //除以5，根据时间定，上来数据间隔时间
+                //除以5，根据时间定，上来数据间隔时间，暂定
                 ec = (TargetTemperature[i] - lastTemperature[i]) / 5;
-               int res = getAlgorithmAns(e, ec);               
+               int res = getAlgorithmAns(e, ec);
+                // 功率加热等级存入数据库
+               heatingValueInt[i] = res;
                heatingValue[i] = Convert.ToByte(res);
             }
             //将本次的数据保存至下次数据来，用于计算ec
             lastTemperature = reaTimeTemperature;
+            return heatingValueInt;
         }
         private int getAlgorithmAns(double a,double b)
         {
             int res =(int) algorithmDll.fuzzyDllCac(a, b);
             return res;
         }
+
+        private byte[] switchAndMotorSignal()
+        {
+
+            //暂时写死
+            byte[] res = new byte[11];
+            runRecordStruct.OperatingSignal = 1;
+            runRecordStruct.allowFeedIn = 1;
+            runRecordStruct.tideAndDustSignal = 1;
+            runRecordStruct.feedInMotor = 1;
+            runRecordStruct.feedOutMotor = 1;
+            runRecordStruct.TransfeDriveMotor = 1;
+            runRecordStruct.BlowbackValve = 1;
+            runRecordStruct.HotAirPositioner = 50;
+            runRecordStruct.rollFreq = 50;
+            runRecordStruct.hotAirFan = 50;
+            runRecordStruct.TideFan = 50;
+            res[0] = Convert.ToByte(runRecordStruct.OperatingSignal);
+            res[1] = Convert.ToByte(runRecordStruct.allowFeedIn);
+            res[2] = Convert.ToByte(runRecordStruct.tideAndDustSignal);
+            res[3] = Convert.ToByte(runRecordStruct.feedInMotor);
+            res[4] = Convert.ToByte(runRecordStruct.feedOutMotor);
+            res[5] = Convert.ToByte(runRecordStruct.TransfeDriveMotor);
+            res[6] = Convert.ToByte(runRecordStruct.BlowbackValve);
+            res[7] = Convert.ToByte(runRecordStruct.HotAirPositioner);
+            res[8] = Convert.ToByte(runRecordStruct.rollFreq);
+            res[9] = Convert.ToByte(runRecordStruct.hotAirFan);
+            res[10] = Convert.ToByte(runRecordStruct.TideFan);           
+            return res;
+        }
+
     }
 }
