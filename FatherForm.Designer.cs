@@ -43,6 +43,8 @@ namespace TobaccoExe
             this.label2 = new System.Windows.Forms.Label();
             this.label_mode = new System.Windows.Forms.Label();
             this.historyMsg = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.ip_label = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -101,6 +103,7 @@ namespace TobaccoExe
             this.menuStrip1.Size = new System.Drawing.Size(1370, 28);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
             // 
             // 模式ToolStripMenuItem
             // 
@@ -144,7 +147,7 @@ namespace TobaccoExe
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(652, 46);
+            this.label2.Location = new System.Drawing.Point(614, 46);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 15);
             this.label2.TabIndex = 7;
@@ -153,7 +156,7 @@ namespace TobaccoExe
             // label_mode
             // 
             this.label_mode.AutoSize = true;
-            this.label_mode.Location = new System.Drawing.Point(739, 46);
+            this.label_mode.Location = new System.Drawing.Point(701, 46);
             this.label_mode.Name = "label_mode";
             this.label_mode.Size = new System.Drawing.Size(127, 15);
             this.label_mode.TabIndex = 8;
@@ -169,11 +172,31 @@ namespace TobaccoExe
             this.historyMsg.UseVisualStyleBackColor = true;
             this.historyMsg.Click += new System.EventHandler(this.historyMsg_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(869, 46);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(53, 15);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "本机ip";
+            // 
+            // ip_label
+            // 
+            this.ip_label.AutoSize = true;
+            this.ip_label.Location = new System.Drawing.Point(951, 46);
+            this.ip_label.Name = "ip_label";
+            this.ip_label.Size = new System.Drawing.Size(63, 15);
+            this.ip_label.TabIndex = 11;
+            this.ip_label.Text = "0.0.0.0";
+            // 
             // FatherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 776);
+            this.Controls.Add(this.ip_label);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.historyMsg);
             this.Controls.Add(this.label_mode);
             this.Controls.Add(this.label2);
@@ -210,6 +233,8 @@ namespace TobaccoExe
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label_mode;
         private System.Windows.Forms.Button historyMsg;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label ip_label;
     }
 }
 

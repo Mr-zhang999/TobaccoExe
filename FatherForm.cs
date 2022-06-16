@@ -27,6 +27,7 @@ namespace TobaccoExe
         MainForm mainForm;
         ParaSetForm paraSetForm;
         HistoryGraphical historyGraphical;
+        FuzzyCac fuzzyCac;
         AlgorithmDll algorithmDll = new AlgorithmDll();
         //极限参数和设定参数
         public static int[] limitPara = new int[5];
@@ -56,7 +57,7 @@ namespace TobaccoExe
         public struct RunRecordStruct
         {
           //烘丝机运行信号
-          public int OperatingSignal;
+           public int OperatingSignal;
             //烘丝机允许进料信号
             public int allowFeedIn;
             //排潮/除尘请求信号
@@ -106,6 +107,8 @@ namespace TobaccoExe
             mainForm = new MainForm();
             paraSetForm = new ParaSetForm();
             historyGraphical = new HistoryGraphical();
+            fuzzyCac = new FuzzyCac();
+
             SendMsgEventToMain += new delegateSendMsgToMainForm(mainForm.EventResponse);           
         }
         private void FatherForm_Load(object sender, EventArgs e)
@@ -114,7 +117,12 @@ namespace TobaccoExe
             //默认操作模式记录
             modeDataOperSave();
             //192.168.2.5
+
             IPAddress ip = GetLocalIPv4Address();
+            this.Invoke(new Action(() =>
+            {
+                ip_label.Text = ip.ToString();
+            }));
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);//定义一个socket
             try
             {
@@ -637,7 +645,7 @@ namespace TobaccoExe
             }
             for (; j < switchAndMotorSignalValue.Length + heatingValue.Length; j++)
             {
-                res[j] = switchAndMotorSignalValue[j - 11];
+                res[j] = heatingValue[j - 11];
             }
             return res;
         }
@@ -745,7 +753,7 @@ namespace TobaccoExe
         private  int[] cacAlgorithmAns(double[] reaTimeTemperature, double[] TargetTemperature)
         {
             int[] heatingValueInt = new int[5];
-            double e = 0, ec = 0;
+            double  e = 0, ec = 0;
             //两输入单输出、传入e 和 ec
             for (int i = 0; i < 5; i++)
             {
@@ -764,12 +772,12 @@ namespace TobaccoExe
         private int getAlgorithmAns(double a,double b)
         {
             //调用动态链接库进行计算、、、需要换成其它算法，在此更改
-            int res =(int) algorithmDll.fuzzyDllCac(a, b);
+            int res =(int) fuzzyCac.fuzzyRes((float)a, (float)b);
+          //  int res =(int) algorithmDll.fuzzyDllCac(a, b);
             return res;
         }
         private byte[] switchAndMotorSignal()
         {
-
             //暂时写死
             byte[] res = new byte[11];
             runRecordStruct.OperatingSignal = 1;
@@ -799,6 +807,11 @@ namespace TobaccoExe
         private void historyMsg_Click(object sender, EventArgs e)
         {
             Showform(historyGraphical);
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 }

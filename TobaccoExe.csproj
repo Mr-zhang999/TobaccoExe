@@ -58,6 +58,7 @@
     <Compile Include="FatherForm.Designer.cs">
       <DependentUpon>FatherForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FuzzyCac.cs" />
     <Compile Include="HistoryGraphical.cs">
       <SubType>Form</SubType>
     </Compile>
