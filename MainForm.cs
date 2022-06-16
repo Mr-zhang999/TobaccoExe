@@ -11,6 +11,7 @@ using static TobaccoExe.FatherForm;
 
 namespace TobaccoApp
 {
+
     public partial class MainForm : Form
     {
         int id_1 = 0;
@@ -50,12 +51,12 @@ namespace TobaccoApp
             this.label_environ_wet.Text = msg[13].ToString();
 
 
-            //不使用委托方式会出问题，，，不理解
-            this.Invoke(new Action(() =>
-            {
-                getData();
-            }));
 
+       //不使用委托方式会出问题，，，不理解
+        this.Invoke(new Action(() =>
+        {
+            getData();
+        }));
         }
         public MainForm()
         {
